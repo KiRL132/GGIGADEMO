@@ -49,12 +49,12 @@ nmtui
 Для HQ-R:
 ```
 nmcli connection modify HQ-R ip-tunnel.ttl 64
-ip r add 192.168.0.128/27 dev gre1
+ip r add 172.16.0.128/27 dev gre1
 ```
 Для BR-R:
 ```
 nmcli connection modify BR-R ip-tunnel.ttl 64
-ip r add 192.168.0.0/25 dev gre1
+ip r add 172.16.0.0/25 dev gre1
 ```
 # 2. Настройте внутреннюю динамическую маршрутизацию по средствам FRR
 # Выполнение:
