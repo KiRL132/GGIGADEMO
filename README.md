@@ -38,13 +38,12 @@ systemctl enable --now NetworkManager
 ```
 nmtui
 ```
-![image](https://github.com/Ganibal-24/demo2024/assets/148868527/aa3f89b4-258d-416d-b640-841dc113e882)
 
 Добавить IP tunnel
 
-![image](https://github.com/Ganibal-24/demo2024/assets/148868527/7119312a-f41a-46c5-bf1e-7d04fe7f29ac)
+![image](https://github.com/KiRL132/GGIGADEMO/assets/148869565/b292c280-912a-448c-98df-dd3a2987b825)
 
-![image](https://github.com/Ganibal-24/demo2024/assets/148868527/102808ba-b1f2-4e68-a05c-7b8afa776640)
+![image](https://github.com/KiRL132/GGIGADEMO/assets/148869565/3e33ffd6-d148-4e8c-9074-7df7b2baa936)
 
 Для HQ-R:
 ```
@@ -83,7 +82,7 @@ vtysh
 conf t
 router ospf
 passive-interface default
- network 192.168.0.0/25 area 0
+ network 172.16.0.0/25 area 0
  network 10.0.0.0/30 area 0
 ```
 Просматриваю соседей:
@@ -103,20 +102,24 @@ mcedit /etc/sysconfig/dhcpd
 ```
 Указал интерфейс который смотрит на HQ-SRV
 ```
-DHCPDARGS=ens224
+DHCPDARGS=ens???
 ```
 Далее следует настройка раздачи адресов, а для этого захожу в файл:
 ```
 mcedit /etc/dhcp/dhcpd.conf
 ```
+
+
+![image](https://github.com/KiRL132/GGIGADEMO/assets/148869565/8f4eecc6-86c6-41f8-ae2d-0b4d8c147e92)
+
 Прописываю конфиг
 ```
 default-lease-time 6000;
 max-lease-time 72000;
 
-subnet 192.168.0.0 netmask 255.255.255.128 {
-range 192.168.0.10 192.168.0.125;
-option routers 192.168.0.1;
+subnet 172.16.0.0 netmask 255.255.255.128 {
+range 172.16.0.5 172.16.0.125;
+option routers 172.16.0.1;
 }
 ```
 Повторяю конфиг в файле /etc/dhcp/dhcpd.conf.example
@@ -153,7 +156,7 @@ systemctl enable --now iperf3
 ```
 Запускаю iperf3 в качестве клиента:
 ```
-iperf3 -c 192.168.0.162
+iperf3 -c 10.10.15.3
 ```
 # 6. Составьте backup скрипты для сохранения конфигурации сетевых устройств
 # Выполнение:
@@ -193,11 +196,15 @@ PasswordAuthentication yes
 
 На HQ-R пишем правило:
 ```
-iptables -t nat -A PREROUTING -p tcp --dport 2222 -g DNAT --to 172.16.0.5:22
+iptables -t nat -A PREROUTING -p tcp --dport 2222 -j DNAT --to 172.16.0.5:22
 ```
-Добавляем и включаем с помощью start и enable. Сохраняем правило командой iptables-save.
-
-iptables-save > /etc/sysconfig/iptables               reboot                iptables-save < /etc/sysconfig/iptables 
+Добавляем и включаем с помощью start и enable.
+```
+iptables-save
+iptables-save > /etc/sysconfig/iptables
+reboot
+iptables-save < /etc/sysconfig/iptables 
+```
 
 Проверяем подключаясь с BR-R на HQ-SRV:
 ```
@@ -207,11 +214,11 @@ ssh -p 2222 admin@172.16.0.5
 # Выполнение:
 На HQ-SRV пишем правило:
 ```
-iptables -A INPUT -p tcp --dport 22 -s 10.10.10.10 -g DROP
+iptables -A INPUT -p tcp --dport 22 -s 10.10.10.10 -j DROP
 ```
 Включаем и добавляем в автозагрузку. Сохраняем правило:
 ```
-iptables-save.
+iptables-save
 iptables-save > /etc/sysconfig/iptables
 reboot
 iptables-save < /etc/sysconfig/iptables 
